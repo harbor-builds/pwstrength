@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pwstrength"
+version = "0.1.0"
+description = "Password strength checks with compiler-style error messages"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "harbor-builds" }]
+
+[project.scripts]
+pwstrength = "pwstrength.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["pwstrength*"]
