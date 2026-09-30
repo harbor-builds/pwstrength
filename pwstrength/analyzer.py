@@ -104,6 +104,24 @@ def _find_keyboard_runs(password: str) -> list[Finding]:
     return findings
 
 
+def _dedupe_spans(findings: list[Finding]) -> list[Finding]:
+    """Keep one finding per exact span, preferring the earlier rule.
+
+    Digit runs like 1234 are both sequential and on the keyboard's number row,
+    so two rules fire on identical characters. Reporting both prints the same
+    caret line twice and costs the score twice for one weakness.
+    """
+    seen = set()
+    kept = []
+    for finding in findings:
+        key = (finding.start, finding.end)
+        if key in seen:
+            continue
+        seen.add(key)
+        kept.append(finding)
+    return kept
+
+
 def _character_classes(password: str) -> int:
     classes = 0
     if any(c in string.ascii_lowercase for c in password):
@@ -153,9 +171,13 @@ def analyze(password: str) -> Report:
             end=len(password),
         ))
 
-    findings.extend(_find_repeated_runs(password))
-    findings.extend(_find_sequential_runs(password))
-    findings.extend(_find_keyboard_runs(password))
+    # Rule order matters here: on an identical span the first rule wins, so
+    # the sequential finding is kept over the keyboard one for digit runs.
+    pattern_findings = []
+    pattern_findings.extend(_find_repeated_runs(password))
+    pattern_findings.extend(_find_sequential_runs(password))
+    pattern_findings.extend(_find_keyboard_runs(password))
+    findings.extend(_dedupe_spans(pattern_findings))
     findings.sort(key=lambda f: f.start)
 
     return Report(

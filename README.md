@@ -80,6 +80,10 @@ as a pre-commit hook for a leaked-secrets file or similar.
 | PW004 | 4+ character ascending/descending run (`abcd`, `4321`) |
 | PW005 | 4+ character run that follows a keyboard row (`qwer`, `asdf`) |
 
+When two pattern rules flag exactly the same characters (`1234` is both a
+sequence and on the keyboard's number row), only one finding is reported,
+the sequential one.
+
 `Report.score` is a 0-4 rating derived from length, character variety, and
 the findings above.
 
